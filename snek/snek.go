@@ -19,6 +19,7 @@ type snekSegment struct {
 type Snek struct {
 	Head *snekSegment
 	Tail *snekSegment
+	Direction int
 }
 
 func (s *Snek) Draw() {
@@ -32,6 +33,8 @@ func (s *Snek) Draw() {
 		}
 	}
 }
+
+
 
 func (s *Snek) Move(d int) {
 	x, y := s.Head.X, s.Head.Y
@@ -65,6 +68,7 @@ func NewSnek(x , y, len int) Snek {
 	newSnek := Snek{
 		Tail: seg,
 		Head: seg,
+		Direction: RIGHT,
 	}
 
 	for i := 1; i < len;  i++ {
