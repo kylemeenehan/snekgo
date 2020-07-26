@@ -1,8 +1,8 @@
 package snek
 
 import (
-	"github.com/kylemeenehan/go-opengl-play/cell"
-	"github.com/kylemeenehan/go-opengl-play/mouse"
+	"github.com/kylemeenehan/snekgo/cell"
+	"github.com/kylemeenehan/snekgo/mouse"
 	"log"
 )
 
@@ -112,6 +112,7 @@ func (s *Snek) Move(d int, m mouse.Mouse) bool {
 }
 
 func NewSnek(x , y, len int, close chan<- bool) Snek {
+	// A snek is an implementation of a linked list
 	if len < 1 {
 		log.Println("Snek must have at least 1 segment.")
 		panic("Snek must have at least 1 segment.")

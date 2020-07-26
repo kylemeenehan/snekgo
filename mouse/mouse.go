@@ -1,6 +1,6 @@
 package mouse
 
-import "github.com/kylemeenehan/go-opengl-play/cell"
+import "github.com/kylemeenehan/snekgo/cell"
 
 type Mouse struct {
 	X, Y int

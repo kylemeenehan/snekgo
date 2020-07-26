@@ -3,10 +3,10 @@ package main
 import (
 	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/kylemeenehan/go-opengl-play/cell"
-	"github.com/kylemeenehan/go-opengl-play/graphics"
-	"github.com/kylemeenehan/go-opengl-play/mouse"
-	"github.com/kylemeenehan/go-opengl-play/snek"
+	"github.com/kylemeenehan/snekgo/cell"
+	"github.com/kylemeenehan/snekgo/graphics"
+	"github.com/kylemeenehan/snekgo/mouse"
+	"github.com/kylemeenehan/snekgo/snek"
 	"math/rand"
 	"runtime"
 	"time"
@@ -32,13 +32,14 @@ func main() {
 	window.SetKeyCallback(handleKeys)
 	defer glfw.Terminate()
 	program := graphics.InitOpenGL()
-	cell.Init(width, height, rows, columns)
-	close := make(chan bool, 1)
-	gameSnek = snek.NewSnek(0, 0, 5, close)
+	cell.Init(rows, columns)
+	closeWindow := make(chan bool, 1)
+	gameSnek = snek.NewSnek(0, 0, 5, closeWindow)
 	makeMouse(0)
+	frame := time.Tick(time.Second / 10)
 	for !window.ShouldClose() {
 		select {
-		case <-close:
+		case <-closeWindow:
 			window.SetShouldClose(true)
 		default:
 			mouseEaten := gameSnek.Move(gameSnek.Direction, ActiveMouse)
@@ -46,7 +47,7 @@ func main() {
 				makeMouse(0)
 			}
 			draw(window, program)
-			time.Sleep(time.Second / 10)
+			<-frame
 		}
 	}
 }

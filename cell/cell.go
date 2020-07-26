@@ -3,16 +3,12 @@ package cell
 import "github.com/go-gl/gl/v4.6-core/gl"
 
 var (
-	width      int
-	height     int
 	NumRows    int
 	NumColumns int
 	cellMatrix [][]*Cell
 )
 
-func Init(w, h, r, c int) {
-	width = w
-	height = h
+func Init(r, c int) {
 	NumRows = r
 	NumColumns = c
 	cellMatrix = MakeCells(c, r)
@@ -26,35 +22,6 @@ var square = []float32{
 	-0.5, 0.5,
 	0.5, 0.5,
 	0.5, -0.5,
-}
-
-type Coordinates struct {
-	X int
-	Y int
-}
-
-func (a *Coordinates) GoUp() {
-	newVal := a.Y + 1
-	a.Y = Bound(newVal, NumRows)
-}
-
-func (a *Coordinates) GoDown() {
-	newVal := a.Y - 1
-	a.Y = Bound(newVal, NumRows)
-}
-
-func (a *Coordinates) GoLeft() {
-	newVal := a.X - 1
-	a.X = Bound(newVal, NumColumns)
-}
-
-func (a *Coordinates) GoRight() {
-	newVal := a.X + 1
-	a.X = Bound(newVal, NumColumns)
-}
-
-func (c *Coordinates) Draw() {
-	cellMatrix[c.X][c.Y].Draw()
 }
 
 func Bound(current int, max int) int {
@@ -89,6 +56,7 @@ func MakeCells(numColumns, numRows int) [][]*Cell {
 	}
 	return cells
 }
+
 func newCell(x, y int) *Cell {
 	points := make([]float32, len(square), len(square))
 	copy(points, square)

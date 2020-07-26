@@ -64,14 +64,14 @@ func InitOpenGL() uint32 {
 		panic(err)
 	}
 
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, vertexShader)
-	gl.AttachShader(prog, fragmentShader)
-	gl.LinkProgram(prog)
-	posAttrib := uint32(gl.GetAttribLocation(prog, gl.Str("position\x00")))
+	program := gl.CreateProgram()
+	gl.AttachShader(program, vertexShader)
+	gl.AttachShader(program, fragmentShader)
+	gl.LinkProgram(program)
+	posAttrib := uint32(gl.GetAttribLocation(program, gl.Str("position\x00")))
 	gl.VertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
 	gl.EnableVertexAttribArray(posAttrib)
-	return prog
+	return program
 }
 
 func compileShader(source string, shaderType uint32) (uint32, error) {
