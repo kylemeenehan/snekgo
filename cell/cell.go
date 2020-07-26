@@ -136,3 +136,7 @@ func makeVao(points []float32) uint32 {
 
 	return vao
 }
+
+func DrawAt(x, y int) {
+	cellMatrix[x][y].Draw()
+}

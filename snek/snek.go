@@ -1,6 +1,9 @@
 package snek
 
-import "github.com/kylemeenehan/go-opengl-play/cell"
+import (
+	"github.com/kylemeenehan/go-opengl-play/cell"
+	"log"
+)
 
 var UP = 0
 var DOWN = 1
@@ -8,7 +11,7 @@ var LEFT = 2
 var RIGHT = 3
 
 type snekSegment struct {
-	Coordinates *cell.Coordinates
+	X, Y int
 	Next        *snekSegment
 	hasNext     bool
 }
@@ -20,10 +23,10 @@ type Snek struct {
 
 func (s *Snek) Draw() {
 	c := s.Tail
-	c.Coordinates.Draw()
+	cell.DrawAt(c.X, c.Y)
 	for {
 		c = c.Next
-		c.Coordinates.Draw()
+		cell.DrawAt(c.X, c.Y)
 		if !c.hasNext {
 			break
 		}
@@ -31,7 +34,7 @@ func (s *Snek) Draw() {
 }
 
 func (s *Snek) Move(d int) {
-	x, y := s.Head.Coordinates.X, s.Head.Coordinates.Y
+	x, y := s.Head.X, s.Head.Y
 
 	switch d {
 	case UP:
@@ -45,51 +48,40 @@ func (s *Snek) Move(d int) {
 	}
 	x = cell.Bound(x, cell.NumColumns)
 	y = cell.Bound(y, cell.NumRows)
-	c := cell.Coordinates {
-		X: x,
-		Y: y,
-	}
-	seg := newSnekSegment(c)
+	seg := newSnekSegment(x, y)
 	s.Head.Next = seg
 	s.Head.hasNext = true
 	s.Head = seg
 	s.Tail = s.Tail.Next
 }
 
-func NewSnek(x , y int) Snek {
-	a := cell.Coordinates {
-		X: x,
-		Y: y,
+func NewSnek(x , y, len int) Snek {
+	if len < 1 {
+		log.Println("Snek must have at least 1 segment.")
+		panic("Snek failed")
 	}
-	seg1 := newSnekSegment(a)
 
-	b := cell.Coordinates {
-		X: x + 1,
-		Y: y,
+	seg := newSnekSegment(x, y)
+	newSnek := Snek{
+		Tail: seg,
+		Head: seg,
 	}
-	seg2 := newSnekSegment(b)
 
-	c := cell.Coordinates {
-		X: x + 2,
-		Y: y,
+	for i := 1; i < len;  i++ {
+		x++
+		seg = newSnekSegment(x, y)
+		newSnek.Head.hasNext = true
+		newSnek.Head.Next = seg
+		newSnek.Head = seg
+
 	}
-	seg3 := newSnekSegment(c)
-
-	seg1.Next = seg2
-	seg1.hasNext = true
-	seg2.Next = seg3
-	seg2.hasNext = true
-
-	s := Snek {
-		Head: seg3,
-		Tail: seg1,
-	}
-	return s
+	return newSnek
 }
 
-func newSnekSegment(c cell.Coordinates) *snekSegment {
+func newSnekSegment(x, y int) *snekSegment {
 	segment := snekSegment {
-		Coordinates: &c,
+		X: x,
+		Y: y,
 		Next: nil,
 		hasNext: false,
 	}

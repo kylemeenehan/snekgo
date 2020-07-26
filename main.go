@@ -46,7 +46,7 @@ func main() {
 	defer glfw.Terminate()
 	program := initOpenGL()
 	cell.Init(width, height, rows, columns)
-	gameSnek = snek.NewSnek(0, 0)
+	gameSnek = snek.NewSnek(0, 0, 5)
 	for !window.ShouldClose() {
 		draw(window, program)
 		time.Sleep(time.Second / 30)
