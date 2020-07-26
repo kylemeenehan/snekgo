@@ -13,16 +13,17 @@ import (
 )
 
 const (
-	width  = 500
-	height = 500
-	rows = 20
+	width   = 500
+	height  = 500
+	rows    = 20
 	columns = 20
 )
 
 var (
-	window *glfw.Window
-	gameSnek snek.Snek
-	ActiveMouse mouse.Mouse
+	window            *glfw.Window
+	gameSnek          snek.Snek
+	ActiveMouse       mouse.Mouse
+	previousDirection int
 )
 
 func main() {
@@ -32,15 +33,21 @@ func main() {
 	defer glfw.Terminate()
 	program := graphics.InitOpenGL()
 	cell.Init(width, height, rows, columns)
-	gameSnek = snek.NewSnek(0, 0, 5)
+	close := make(chan bool, 1)
+	gameSnek = snek.NewSnek(0, 0, 5, close)
 	makeMouse(0)
 	for !window.ShouldClose() {
-		mouseEaten := gameSnek.Move(gameSnek.Direction, ActiveMouse)
-		if mouseEaten {
-			makeMouse(0)
+		select {
+		case <-close:
+			window.SetShouldClose(true)
+		default:
+			mouseEaten := gameSnek.Move(gameSnek.Direction, ActiveMouse)
+			if mouseEaten {
+				makeMouse(0)
+			}
+			draw(window, program)
+			time.Sleep(time.Second / 5)
 		}
-		draw(window, program)
-		time.Sleep(time.Second / 5)
 	}
 }
 
@@ -49,6 +56,7 @@ func draw(window *glfw.Window, program uint32) {
 	gl.UseProgram(program)
 	gameSnek.Draw()
 	ActiveMouse.Draw()
+	previousDirection = gameSnek.Direction
 	glfw.PollEvents()
 	window.SwapBuffers()
 }
@@ -59,13 +67,21 @@ func handleKeys(window *glfw.Window, key glfw.Key, scancode int, action glfw.Act
 	}
 	switch key {
 	case glfw.KeyUp:
-		gameSnek.Direction = snek.UP
+		if previousDirection != snek.DOWN {
+			gameSnek.Direction = snek.UP
+		}
 	case glfw.KeyDown:
-		gameSnek.Direction = snek.DOWN
+		if previousDirection != snek.UP {
+			gameSnek.Direction = snek.DOWN
+		}
 	case glfw.KeyLeft:
-		gameSnek.Direction = snek.LEFT
+		if previousDirection != snek.RIGHT {
+			gameSnek.Direction = snek.LEFT
+		}
 	case glfw.KeyRight:
-		gameSnek.Direction = snek.RIGHT
+		if previousDirection != snek.LEFT {
+			gameSnek.Direction = snek.RIGHT
+		}
 	case glfw.KeyEscape:
 		window.SetShouldClose(true)
 	}
@@ -75,8 +91,8 @@ func makeMouse(numTries int) {
 	maxTries := 100
 	x := rand.Intn(columns)
 	y := rand.Intn(rows)
-	hasX, hasY := gameSnek.HasSegment(x, y)
-	if !(hasX && hasY) {
+	//hasX, hasY := gameSnek.HasSegment(x, y)
+	if !(gameSnek.HasSegment(x, y)) {
 		ActiveMouse = mouse.NewMouse(x, y)
 	} else {
 		numTries++

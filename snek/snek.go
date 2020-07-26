@@ -21,6 +21,7 @@ type Snek struct {
 	Head *snekSegment
 	Tail *snekSegment
 	Direction int
+	Close chan<- bool
 }
 
 func (s *Snek) Draw() {
@@ -49,7 +50,7 @@ func (s *Snek) GetLength() int {
 	return length
 }
 
-func (s *Snek) HasSegment(x, y int) (bool, bool) {
+func (s *Snek) HasXY(x, y int) (bool, bool) {
 	hasX, hasY := false, false
 	c := s.Tail
 	for {
@@ -67,6 +68,19 @@ func (s *Snek) HasSegment(x, y int) (bool, bool) {
 	return hasX, hasY
 }
 
+func (s *Snek) HasSegment(x, y int) bool {
+	c := s.Tail
+	for {
+		if c.X == x && c.Y == y {
+			return true
+		}
+		if !c.hasNext {
+			break
+		}
+		c = c.Next
+	}
+	return false
+}
 // Returns whether a mouse has been eaten
 func (s *Snek) Move(d int, m mouse.Mouse) bool {
 	x, y := s.Head.X, s.Head.Y
@@ -83,6 +97,9 @@ func (s *Snek) Move(d int, m mouse.Mouse) bool {
 	}
 	x = cell.Bound(x, cell.NumColumns)
 	y = cell.Bound(y, cell.NumRows)
+	if s.HasSegment(x, y) {
+		s.Close <- true
+	}
 	seg := newSnekSegment(x, y)
 	s.Head.Next = seg
 	s.Head.hasNext = true
@@ -94,10 +111,10 @@ func (s *Snek) Move(d int, m mouse.Mouse) bool {
 	return true
 }
 
-func NewSnek(x , y, len int) Snek {
+func NewSnek(x , y, len int, close chan<- bool) Snek {
 	if len < 1 {
 		log.Println("Snek must have at least 1 segment.")
-		panic("Snek failed")
+		panic("Snek must have at least 1 segment.")
 	}
 
 	seg := newSnekSegment(x, y)
@@ -105,6 +122,7 @@ func NewSnek(x , y, len int) Snek {
 		Tail: seg,
 		Head: seg,
 		Direction: RIGHT,
+		Close: close,
 	}
 
 	for i := 1; i < len;  i++ {
