@@ -7,6 +7,7 @@ import (
 	"github.com/kylemeenehan/go-opengl-play/graphics"
 	"github.com/kylemeenehan/go-opengl-play/mouse"
 	"github.com/kylemeenehan/go-opengl-play/snek"
+	"math/rand"
 	"runtime"
 	"time"
 )
@@ -31,10 +32,13 @@ func main() {
 	defer glfw.Terminate()
 	program := graphics.InitOpenGL()
 	cell.Init(width, height, rows, columns)
-	ActiveMouse = mouse.NewMouse(5, 5)
 	gameSnek = snek.NewSnek(0, 0, 5)
+	makeMouse(0)
 	for !window.ShouldClose() {
-		gameSnek.Move(gameSnek.Direction, ActiveMouse)
+		mouseEaten := gameSnek.Move(gameSnek.Direction, ActiveMouse)
+		if mouseEaten {
+			makeMouse(0)
+		}
 		draw(window, program)
 		time.Sleep(time.Second / 5)
 	}
@@ -64,5 +68,31 @@ func handleKeys(window *glfw.Window, key glfw.Key, scancode int, action glfw.Act
 		gameSnek.Direction = snek.RIGHT
 	case glfw.KeyEscape:
 		window.SetShouldClose(true)
+	}
+}
+
+func makeMouse(numTries int) {
+	maxTries := 100
+	x := rand.Intn(columns)
+	y := rand.Intn(rows)
+	hasX, hasY := gameSnek.HasSegment(x, y)
+	if !(hasX && hasY) {
+		ActiveMouse = mouse.NewMouse(x, y)
+	} else {
+		numTries++
+		if numTries >= maxTries {
+			panic("too many tries")
+		}
+		makeMouse(numTries)
+		// TODO: optimise to scan
+		//for numTries < maxTries {
+		//	switch {
+		//	case hasX && hasY:
+		//		x++
+		//		y++
+		//	case hasX:
+		//		x++
+		//	}
+		//}
 	}
 }

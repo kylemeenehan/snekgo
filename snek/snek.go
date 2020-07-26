@@ -36,6 +36,7 @@ func (s *Snek) Draw() {
 }
 
 func (s *Snek) GetLength() int {
+	// TODO add toIterable method
 	length := 0
 	c := s.Tail
 	for {
@@ -48,7 +49,26 @@ func (s *Snek) GetLength() int {
 	return length
 }
 
-func (s *Snek) Move(d int, m mouse.Mouse) {
+func (s *Snek) HasSegment(x, y int) (bool, bool) {
+	hasX, hasY := false, false
+	c := s.Tail
+	for {
+		if !hasX {
+			hasX = c.X == x
+		}
+		if !hasY {
+			hasY = c.Y == y
+		}
+		if !c.hasNext || (hasX && hasY) {
+			break
+		}
+		c = c.Next
+	}
+	return hasX, hasY
+}
+
+// Returns whether a mouse has been eaten
+func (s *Snek) Move(d int, m mouse.Mouse) bool {
 	x, y := s.Head.X, s.Head.Y
 
 	switch d {
@@ -69,7 +89,9 @@ func (s *Snek) Move(d int, m mouse.Mouse) {
 	s.Head = seg
 	if !(m.X == x && m.Y == y) {
 		s.Tail = s.Tail.Next
+		return false
 	}
+	return true
 }
 
 func NewSnek(x , y, len int) Snek {
