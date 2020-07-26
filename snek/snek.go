@@ -2,6 +2,7 @@ package snek
 
 import (
 	"github.com/kylemeenehan/go-opengl-play/cell"
+	"github.com/kylemeenehan/go-opengl-play/mouse"
 	"log"
 )
 
@@ -34,9 +35,20 @@ func (s *Snek) Draw() {
 	}
 }
 
+func (s *Snek) GetLength() int {
+	length := 0
+	c := s.Tail
+	for {
+		length++
+		c = c.Next
+		if !c.hasNext {
+			break
+		}
+	}
+	return length
+}
 
-
-func (s *Snek) Move(d int) {
+func (s *Snek) Move(d int, m mouse.Mouse) {
 	x, y := s.Head.X, s.Head.Y
 
 	switch d {
@@ -55,7 +67,9 @@ func (s *Snek) Move(d int) {
 	s.Head.Next = seg
 	s.Head.hasNext = true
 	s.Head = seg
-	s.Tail = s.Tail.Next
+	if !(m.X == x && m.Y == y) {
+		s.Tail = s.Tail.Next
+	}
 }
 
 func NewSnek(x , y, len int) Snek {
