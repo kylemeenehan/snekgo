@@ -5,6 +5,7 @@ import (
 	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/kylemeenehan/go-opengl-play/cell"
+	"github.com/kylemeenehan/go-opengl-play/snek"
 	"log"
 	"runtime"
 	"strings"
@@ -36,29 +37,26 @@ const (
 	` + "\x00"
 )
 
-var headCell = cell.ActiveCell{ X: 0, Y: 0}
+//var headCell = cell.Coordinates{ X: 0, Y: 0}
+var gameSnek snek.Snek
 
 func main() {
-	cell.Init(width, height, rows, columns)
 	runtime.LockOSThread()
-
 	window := initGlfw()
 	defer glfw.Terminate()
 	program := initOpenGL()
-
-	cells := cell.MakeCells()
-
+	cell.Init(width, height, rows, columns)
+	gameSnek = snek.NewSnek(0, 0)
 	for !window.ShouldClose() {
-		draw(cells, window, program)
+		draw(window, program)
 		time.Sleep(time.Second / 30)
 	}
 }
-func draw(cells [][]*cell.Cell, window *glfw.Window, program uint32) {
+func draw(window *glfw.Window, program uint32) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.UseProgram(program)
-
-	log.Println(headCell)
-	cells[headCell.X][headCell.Y].Draw()
+	gameSnek.Draw()
+	//headCell.Draw()
 	glfw.PollEvents()
 	window.SwapBuffers()
 }
@@ -144,15 +142,15 @@ func handleKeys(window *glfw.Window, key glfw.Key, scancode int, action glfw.Act
 	switch key {
 	case glfw.KeyUp:
 		log.Println("up")
-		headCell.GoUp()
+		gameSnek.Move(snek.UP)
 	case glfw.KeyDown:
 		log.Println("down")
-		headCell.GoDown()
+		gameSnek.Move(snek.DOWN)
 	case glfw.KeyLeft:
 		log.Println("left")
-		headCell.GoLeft()
+		gameSnek.Move(snek.LEFT)
 	case glfw.KeyRight:
 		log.Println("right")
-		headCell.GoRight()
+		gameSnek.Move(snek.RIGHT)
 	}
 }

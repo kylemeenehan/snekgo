@@ -3,17 +3,19 @@ package cell
 import "github.com/go-gl/gl/v4.6-core/gl"
 
 var (
-	width int
-	height int
-	numRows int
-	numColumns int
+	width      int
+	height     int
+	NumRows    int
+	NumColumns int
+	cellMatrix [][]*Cell
 )
 
 func Init(w, h, r, c int) {
 	width = w
 	height = h
-	numRows = r
-	numColumns = c
+	NumRows = r
+	NumColumns = c
+	cellMatrix = MakeCells(c, r)
 }
 
 var square = []float32{
@@ -26,32 +28,36 @@ var square = []float32{
 	0.5, -0.5,
 }
 
-type ActiveCell struct {
+type Coordinates struct {
 	X int
 	Y int
 }
 
-func (a *ActiveCell) GoUp() {
+func (a *Coordinates) GoUp() {
 	newVal := a.Y + 1
-	a.Y = bound(newVal, numRows)
+	a.Y = Bound(newVal, NumRows)
 }
 
-func (a *ActiveCell) GoDown() {
+func (a *Coordinates) GoDown() {
 	newVal := a.Y - 1
-	a.Y = bound(newVal, numRows)
+	a.Y = Bound(newVal, NumRows)
 }
 
-func (a *ActiveCell) GoLeft() {
+func (a *Coordinates) GoLeft() {
 	newVal := a.X - 1
-	a.X = bound(newVal, numColumns)
+	a.X = Bound(newVal, NumColumns)
 }
 
-func (a *ActiveCell) GoRight() {
+func (a *Coordinates) GoRight() {
 	newVal := a.X + 1
-	a.X = bound(newVal, numColumns)
+	a.X = Bound(newVal, NumColumns)
 }
 
-func bound(current int, max int) int {
+func (c *Coordinates) Draw() {
+	cellMatrix[c.X][c.Y].Draw()
+}
+
+func Bound(current int, max int) int {
 	arrayLimit := max - 1
 	if current > arrayLimit {
 		return 0
@@ -73,7 +79,7 @@ func (c *Cell) Draw() {
 	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square) / 2))
 }
 
-func MakeCells() [][]*Cell {
+func MakeCells(numColumns, numRows int) [][]*Cell {
 	cells := make([][]*Cell, numColumns)
 	for x := range cells {
 		cells[x] = make([]*Cell, numRows)
@@ -92,10 +98,10 @@ func newCell(x, y int) *Cell {
 		var size float32
 
 		if mod := i % 2; mod == 0 {
-			size = 1.0 / float32(numColumns)
+			size = 1.0 / float32(NumColumns)
 			position = float32(x) * size
 		} else {
-			size = 1.0 / float32(numRows)
+			size = 1.0 / float32(NumRows)
 			position = float32(y) * size
 		}
 
@@ -105,27 +111,6 @@ func newCell(x, y int) *Cell {
 			points[i] = ((position + size) * 2) - 1
 		}
 	}
-
-	//for i := 0; i < len(points); i++ {
-	//	var position float32
-	//	var size float32
-	//	switch i % 3 {
-	//	case 0:
-	//		size = 1.0 / float32(numColumns)
-	//		position = float32(x) * size
-	//	case 1:
-	//		size = 1.0 / float32(numRows)
-	//		position = float32(y) * size
-	//	default:
-	//		continue
-	//	}
-	//
-	//	if points[i] < 0 {
-	//		points[i] = (position * 2) - 1
-	//	} else {
-	//		points[i] = ((position + size) * 2) - 1
-	//	}
-	//}
 
 	return &Cell{
 		drawable: makeVao(points),
