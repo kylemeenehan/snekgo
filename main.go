@@ -15,8 +15,8 @@ import (
 const (
 	width   = 500
 	height  = 500
-	rows    = 20
-	columns = 20
+	rows    = 15
+	columns = 15
 )
 
 var (
@@ -46,7 +46,7 @@ func main() {
 				makeMouse(0)
 			}
 			draw(window, program)
-			time.Sleep(time.Second / 5)
+			time.Sleep(time.Second / 10)
 		}
 	}
 }
